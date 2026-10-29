@@ -27,6 +27,17 @@ body {
     height: 20px;
 }
 
+/* Estilos para el header */
+.header {
+    background-color: #212529;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.header-title {
+    font-weight: 600;
+}
+
 /* Estilos para los desafíos */
 .challenge-card {
     transition: transform 0.2s;
