@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Laboratorios Web Seguros{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>Panel de Control</h1>
+        <p>Bienvenido al entorno de entrenamiento en seguridad web.</p>
+    </div>
+</div>
+
+<!-- Progreso General -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3>Progreso General</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h5>{{ overall_progress.completed }} de {{ overall_progress.total }} desafíos completados</h5>
+                        <p>Porcentaje: {{ overall_progress.percentage }}%</p>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="progress">
+                            <div class="progress-bar" role="progressbar" style="width: {{ overall_progress.percentage }}%" aria-valuenow="{{ overall_progress.percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                {{ overall_progress.percentage }}%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Semanas -->
+<div class="row">
+    <div class="col-12">
+        <h2>Semanas de Entrenamiento</h2>
+    </div>
+</div>
+
+{% for week in weekly_progress %}
+<div class="row mb-3">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4>Semana {{ week.week }}: {{ week.title }}</h4>
+                <span class="badge bg-primary">{{ week.percentage }}%</span>
+            </div>
+            <div class="card-body">
+                <div class="progress mb-3">
+                    <div class="progress-bar" role="progressbar" style="width: {{ week.percentage }}%" aria-valuenow="{{ week.percentage }}" aria-valuemin="0" aria-valuemax="100">
+                        {{ week.completed }} de {{ week.total }} desafíos
+                    </div>
+                </div>
+                
+                <div class="row">
+                    {% for challenge in week.challenges %}
+                    <div class="col-md-4 mb-2">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ challenge.title }}</h5>
+                                <p class="card-text">{{ challenge.description }}</p>
+                                <span class="badge bg-secondary">{{ challenge.difficulty }}</span>
+                                <span class="badge 
+                                    {% if challenge.status == 'completed' %}bg-success{% elif challenge.status == 'in_progress' %}bg-warning{% else %}bg-light text-dark{% endif %}
+                                ">
+                                    {{ challenge.status }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
