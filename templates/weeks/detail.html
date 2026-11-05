@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle Semana - Laboratorios Web Seguros{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <a href="{% url 'weeks:index' %}" class="btn btn-outline-primary mb-3">
+                <i class="bi bi-arrow-left"></i> Volver a Semanas
+            </a>
+            <h1>Semana {{ week_number }}</h1>
+            <p>Detalle de la semana {{ week_number }}</p>
+        </div>
+    </div>
+    
+    <!-- Contenido del detalle de la semana -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Contenido de la Semana {{ week_number }}</h5>
+                    <p class="card-text">Este contenido se implementará en una etapa futura.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

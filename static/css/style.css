@@ -64,6 +64,109 @@ body {
     font-weight: 500;
 }
 
+/* Estilos para las tarjetas KPI */
+.kpi-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.kpi-card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    padding: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    transition: transform 0.2s ease-in-out;
+}
+
+.kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+}
+    
+.kpi-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+    
+.kpi-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.kpi-title {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
+
+.kpi-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #212529;
+}
+
+/* Estilos para las tarjetas de semanas */
+.week-card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    padding: 1.5rem;
+    transition: all 0.2s ease-in-out;
+    border: 1px solid #dee2e6;
+    height: 100%;
+}
+
+.week-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+    border-color: #0d6efd;
+}
+
+.week-header {
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.week-number {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0d6efd;
+    margin: 0;
+}
+
+.week-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #212529;
+    margin: 0.25rem 0 0 0;
+}
+
+.week-status {
+    text-align: right;
+}
+
+.week-progress-text {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin: 0;
+}
+
+.week-progress-bar {
+    height: 10px;
+    border-radius: 5px;
+}
+
+.week-link {
+    text-align: right;
+}
+
 /* Estilos para los desafíos */
 .challenge-card {
     transition: transform 0.2s;
@@ -75,14 +178,18 @@ body {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+    .kpi-container {
+        grid-template-columns: 1fr;
+    }
+
     .card-body {
         padding: 1rem;
     }
-    
+
     h1 {
         font-size: 1.5rem;
     }
-    
+
     h3 {
         font-size: 1.25rem;
     }

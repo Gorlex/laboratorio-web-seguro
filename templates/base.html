@@ -46,13 +46,13 @@
                 <div class="position-sticky pt-3">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link active" href="{% url 'dashboard:index' %}">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}" href="{% url 'dashboard:index' %}">
                                 <i class="bi bi-speedometer2 me-2"></i>
                                 Panel principal
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'index' or request.resolver_match.url_name == 'detail' %}active{% endif %}" href="{% url 'weeks:index' %}">
                                 <i class="bi bi-calendar-week me-2"></i>
                                 Semanas y contenidos
                             </a>
