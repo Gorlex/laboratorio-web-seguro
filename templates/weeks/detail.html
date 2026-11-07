@@ -9,18 +9,72 @@
             <a href="{% url 'weeks:index' %}" class="btn btn-outline-primary mb-3">
                 <i class="bi bi-arrow-left"></i> Volver a Semanas
             </a>
-            <h1>Semana {{ week_number }}</h1>
-            <p>Detalle de la semana {{ week_number }}</p>
+            <h1>Semana {{ semana.numero }}: {{ semana.titulo }}</h1>
         </div>
     </div>
     
     <!-- Contenido del detalle de la semana -->
     <div class="row">
         <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Estado</h5>
+                    <p class="card-text">
+                        {{ semana.retos_completados }} de {{ semana.total_retos }} retos · {{ semana.porcentaje }}%
+                    </p>
+                    <div class="progress">
+                        <div class="progress-bar" 
+                             role="progressbar" 
+                             style="width: {{ semana.porcentaje }}%" 
+                             aria-valuenow="{{ semana.porcentaje }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                            {{ semana.porcentaje }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Objetivo de Aprendizaje</h5>
+                    <p class="card-text">{{ semana.objetivo_aprendizaje }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Contenido de la Semana {{ week_number }}</h5>
-                    <p class="card-text">Este contenido se implementará en una etapa futura.</p>
+                    <h5 class="card-title">Retos Prácticos</h5>
+                    <div class="row">
+                        {% for reto in semana.retos %}
+                        <div class="col-md-12 mb-3">
+                            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                                <div>
+                                    <strong>{{ reto.nombre }}</strong>
+                                </div>
+                                <div>
+                                    {% if reto.completado %}
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle"></i> Completado
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">
+                                        <i class="bi bi-clock"></i> Pendiente
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>
