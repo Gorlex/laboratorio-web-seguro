@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'apps.dashboard',
     'apps.weeks',
+    'apps.challenges',
 ]
 
 MIDDLEWARE = [

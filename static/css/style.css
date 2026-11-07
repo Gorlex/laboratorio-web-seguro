@@ -176,6 +176,16 @@ body {
     transform: translateY(-5px);
 }
 
+/* Estilos para efecto hover en retos */
+.hover-effect {
+    transition: all 0.2s ease-in-out;
+}
+
+.hover-effect:hover {
+    background-color: #e9ecef !important;
+    transform: translateX(5px);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .kpi-container {
@@ -194,3 +204,4 @@ body {
         font-size: 1.25rem;
     }
 }
+

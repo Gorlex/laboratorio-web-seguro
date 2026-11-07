@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Reto 1 - Laboratorios Web Seguros{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <a href="{% url 'weeks:detail' challenge.semana_numero %}" class="btn btn-outline-primary mb-3">
+                <i class="bi bi-arrow-left"></i> Volver a la Semana {{ challenge.semana_numero }}
+            </a>
+            <h1>SEMANA {{ challenge.semana_numero }} · RETO {{ challenge.numero }}</h1>
+            <h2>{{ challenge.titulo }}</h2>
+            
+            <!-- Indicador de estado -->
+            <div class="mt-3">
+                {% if challenge.estado == 'Resuelto' %}
+                    <span class="badge bg-success">
+                        <i class="bi bi-check-circle"></i> ✓ Resuelto
+                    </span>
+                {% else %}
+                    <span class="badge bg-secondary">
+                        <i class="bi bi-clock"></i> ○ Pendiente
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Objetivo del reto -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">OBJETIVO DEL RETO</h5>
+                </div>
+                <div class="card-body">
+                    <p>{{ challenge.objetivo }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contexto -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">CONTEXTO</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>De:</strong> {{ challenge.contexto.de }}</p>
+                    <p><strong>Para:</strong> {{ challenge.contexto.para }}</p>
+                    <p><strong>Asunto:</strong> {{ challenge.contexto.asunto }}</p>
+                    
+                    <h6 class="mt-3">Situación</h6>
+                    <p>{{ challenge.contexto.situacion }}</p>
+                    
+                    <h6 class="mt-3">EL INCIDENTE</h6>
+                    <p>{{ challenge.contexto.incidente }}</p>
+                    
+                    <h6 class="mt-3">HIPÓTESIS DEL COMITÉ DE CRISIS</h6>
+                    <p>{{ challenge.contexto.hipotesis }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instrucciones -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">INSTRUCCIONES</h5>
+                </div>
+                <div class="card-body">
+                    {% for instruccion in challenge.instrucciones %}
+                    <div class="mb-3">
+                        <h6>Paso {{ instruccion.paso }} — {{ instruccion.titulo }}</h6>
+                        <p>{{ instruccion.contenido|safe }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estado del reto -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if challenge.estado == 'Resuelto' %}
+                        <span class="badge bg-success">
+                            <i class="bi bi-check-circle"></i> RETO RESUELTO
+                        </span>
+                        <p class="mt-2">La evidencia del reto ha sido verificada correctamente.</p>
+                    {% else %}
+                        <span class="badge bg-secondary">
+                            <i class="bi bi-clock"></i> ○ Pendiente
+                        </span>
+                        <p class="mt-2">Realiza las instrucciones en el laboratorio</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
