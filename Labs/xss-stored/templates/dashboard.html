@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Médico - Gestión de Salud</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="user-info">
+                👤 {{ usuario }}
+            </div>
+            <h1>🏥 Portal Médico</h1>
+            <p>Sistema de gestión médica integral</p>
+        </div>
+
+        <!-- Grid de médicos -->
+        <div class="medicos-grid">
+            {% for medico in medicos %}
+            <div class="medico-card">
+                <div class="medico-header">
+                    <img src="{{ medico.imagen }}" alt="{{ medico.nombre }}">
+                    <h2>{{ medico.nombre }}</h2>
+                    <div class="especialidad">{{ medico.especialidad }}</div>
+                </div>
+                
+                <div class="medico-body">
+                    <h3>Perfil</h3>
+                    <p>{{ medico.semblanza }}</p>
+
+                    <h3>Certificaciones</h3>
+                    <ul>
+                        {% for cert in medico.certificaciones %}
+                        <li>{{ cert }}</li>
+                        {% endfor %}
+                    </ul>
+
+                    <h3>Servicios</h3>
+                    <ul>
+                        {% for servicio in medico.servicios %}
+                        <li>{{ servicio }}</li>
+                        {% endfor %}
+                    </ul>
+
+                    <h3>Enfermedades que trata</h3>
+                    <ul>
+                        {% for enfermedad in medico.enfermedades %}
+                        <li>{{ enfermedad }}</li>
+                        {% endfor %}
+                    </ul>
+
+                    <h3>Horarios de atención</h3>
+                    <div class="horarios">
+                        {% for horario in medico.horarios %}
+                        <p>{{ horario }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="botones-container">
+                        <a href="#" class="btn btn-primary" onclick="alert('Función de agendar citas en desarrollo'); return false;">
+                            📅 Agendar Cita
+                        </a>
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                            📝 Notas Médicas
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>© 2026 Portal Médico - Laboratorio de Seguridad Web</p>
+        </div>
+    </div>
+</body>
+</html>

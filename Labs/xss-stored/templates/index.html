@@ -3,93 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Notas Médicas - Agregar</title>
+    <title>Agregar Nota Médica</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
+        .form-container {
             background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
         }
-        h1 {
+        .form-container h1 {
             color: #2c3e50;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
+            margin-bottom: 30px;
         }
         .form-group {
             margin-bottom: 20px;
         }
-        label {
+        .form-group label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+            margin-bottom: 8px;
             color: #34495e;
+            font-weight: 600;
         }
-        input[type="text"], textarea {
+        .form-group input,
+        .form-group textarea {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 14px;
         }
-        textarea {
-            min-height: 100px;
+        .form-group textarea {
+            min-height: 120px;
             resize: vertical;
         }
-        button {
-            background-color: #3498db;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #2980b9;
-        }
-        .nav {
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
             margin-bottom: 20px;
-        }
-        .nav a {
-            color: #3498db;
-            text-decoration: none;
-            margin-right: 15px;
-        }
-        .nav a:hover {
-            text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="nav">
-            <a href="/">Agregar Nota</a>
-            <a href="/listar">Ver Notas</a>
+        <div class="form-container">
+            <div class="user-info" style="float: right;">
+                👤 {{ usuario }}
+            </div>
+            
+            <div class="nav-buttons">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary">← Volver al Portal</a>
+                <a href="{{ url_for('listar') }}" class="btn btn-secondary">Ver Notas</a>
+            </div>
+            
+            <h1>📝 Agregar Nota Médica</h1>
+            
+            <form action="{{ url_for('guardar') }}" method="POST">
+                <div class="form-group">
+                    <label for="paciente">Nombre del Paciente:</label>
+                    <input type="text" id="paciente" name="paciente" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nota">Nota Médica:</label>
+                    <textarea id="nota" name="nota" required></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-secondary">Guardar Nota</button>
+            </form>
         </div>
-        
-        <h1>Agregar Nota Médica</h1>
-        
-        <form action="/guardar" method="POST">
-            <div class="form-group">
-                <label for="paciente">Nombre del Paciente:</label>
-                <input type="text" id="paciente" name="paciente" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="nota">Nota Médica:</label>
-                <textarea id="nota" name="nota" required></textarea>
-            </div>
-            
-            <button type="submit">Guardar Nota</button>
-        </form>
     </div>
 </body>
 </html>

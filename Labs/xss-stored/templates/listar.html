@@ -3,94 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Notas Médicas - Listado</title>
+    <title>Listado de Notas Médicas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
+        .list-container {
             background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        h1 {
+        .list-container h1 {
             color: #2c3e50;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
+            margin-bottom: 30px;
         }
         .nota {
             background: #ecf0f1;
-            padding: 15px;
+            padding: 20px;
             margin-bottom: 15px;
-            border-radius: 4px;
+            border-radius: 8px;
             border-left: 4px solid #3498db;
         }
         .nota-header {
             font-weight: bold;
             color: #2c3e50;
             margin-bottom: 10px;
+            font-size: 16px;
         }
         .nota-content {
             color: #34495e;
             line-height: 1.6;
+            margin-bottom: 10px;
         }
         .nota-date {
             font-size: 12px;
             color: #7f8c8d;
-            margin-top: 10px;
-        }
-        .nav {
-            margin-bottom: 20px;
-        }
-        .nav a {
-            color: #3498db;
-            text-decoration: none;
-            margin-right: 15px;
-        }
-        .nav a:hover {
-            text-decoration: underline;
         }
         .empty {
             text-align: center;
             color: #7f8c8d;
             padding: 40px;
         }
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="nav">
-            <a href="/">Agregar Nota</a>
-            <a href="/listar">Ver Notas</a>
-        </div>
-        
-        <h1>Notas Médicas</h1>
-        
-        {% if notas %}
-            {% for nota in notas %}
-                <div class="nota">
-                    <div class="nota-header">
-                        Paciente: {{ nota.paciente }}
-                    </div>
-                    <div class="nota-content">
-                        <!-- ⚠️ VULNERABILIDAD XSS: Usamos |safe para NO escapar el HTML -->
-                        {{ nota.nota | safe }}
-                    </div>
-                    <div class="nota-date">
-                        Fecha: {{ nota.fecha_creacion }}
-                    </div>
-                </div>
-            {% endfor %}
-        {% else %}
-            <div class="empty">
-                <p>No hay notas médicas registradas.</p>
+        <div class="list-container">
+            <div class="user-info" style="float: right;">
+                👤 {{ usuario }}
             </div>
-        {% endif %}
+            
+            <div class="nav-buttons">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary">← Volver al Portal</a>
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">+ Nueva Nota</a>
+            </div>
+            
+            <h1>📋 Notas Médicas</h1>
+            
+            {% if notas %}
+                {% for nota in notas %}
+                    <div class="nota">
+                        <div class="nota-header">
+                            👤 Paciente: {{ nota.paciente }}
+                        </div>
+                        <div class="nota-content">
+                            {{ nota.nota | safe }}
+                        </div>
+                        <div class="nota-date">
+                            🕐 {{ nota.fecha_creacion }}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty">
+                    <p>No hay notas médicas registradas.</p>
+                </div>
+            {% endif %}
+        </div>
     </div>
 </body>
 </html>
