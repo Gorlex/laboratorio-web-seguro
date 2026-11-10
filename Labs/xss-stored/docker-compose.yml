@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  lab-xss:
+    build: .
+    container_name: lab-xss-flask
+    ports:
+      - "127.0.0.1:8081:5000"
+    # No se monta volumen para notas.db para mantener estado limpio
+    # La base de datos solo existe dentro del ciclo de vida del contenedor

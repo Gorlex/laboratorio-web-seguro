@@ -1,0 +1,25 @@
+# Ignorar archivos de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Ignorar archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Ignorar archivos de logs
+*.log
+
+# No ignorar los archivos necesarios para la aplicación
+!app.py
+!requirements.txt
+!notas.db
+!templates/
+!static/

@@ -217,4 +217,5 @@ def listar():
 
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True)
+    # Cambiar el host a 0.0.0.0 para que sea accesible desde Docker
+    app.run(debug=True, host='0.0.0.0', port=5000)
