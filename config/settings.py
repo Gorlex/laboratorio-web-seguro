@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'apps.dashboard',
     'apps.weeks',
     'apps.challenges',
+    "apps.labs.apps.LabsConfig",
 ]
 
 MIDDLEWARE = [
