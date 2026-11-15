@@ -22,4 +22,5 @@ urlpatterns = [
     path('', include('apps.dashboard.urls')),
     path('semanas/', include('apps.weeks.urls')),
     path('reto/', include('apps.challenges.urls')),
+    path("labs/", include("apps.labs.urls")),
 ]
