@@ -56,24 +56,38 @@
                     <div class="row">
                         {% for reto in semana.retos %}
                         <div class="col-md-12 mb-3">
-                            <a href="{{ reto.url }}" class="text-decoration-none">
-                                <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded hover-effect">
-                                    <div>
-                                        <strong>{{ reto.nombre }}</strong>
-                                    </div>
-                                    <div>
-                                        {% if reto.completado %}
-                                        <span class="badge bg-success">
-                                            <i class="bi bi-check-circle"></i> Completado
-                                        </span>
-                                        {% else %}
-                                        <span class="badge bg-secondary">
-                                            <i class="bi bi-clock"></i> Pendiente
-                                        </span>
-                                        {% endif %}
-                                    </div>
+                            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded hover-effect">
+                                <div>
+                                    <strong>{{ reto.nombre }}</strong>
                                 </div>
-                            </a>
+                                <div>
+                                    {% if reto.completado %}
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle"></i> Completado
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">
+                                        <i class="bi bi-clock"></i> Pendiente
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <!-- Botones del laboratorio XSS -->
+                            {% if semana.numero == 2 and reto.nombre == "Reto 1" %}
+                            <div class="mt-2">
+                                <button id="btn-iniciar-lab-{{ reto.nombre }}" 
+                                        class="btn btn-primary" 
+                                        onclick="iniciarLaboratorio('{{ reto.nombre }}')">
+                                    Iniciar laboratorio
+                                </button>
+                                <button id="btn-abrir-lab-{{ reto.nombre }}" 
+                                        class="btn btn-success d-none" 
+                                        onclick="abrirLaboratorio()">
+                                    Abrir laboratorio
+                                </button>
+                                <div id="status-{{ reto.nombre }}" class="mt-2"></div>
+                            </div>
+                            {% endif %}
                         </div>
                         {% endfor %}
                     </div>
@@ -82,4 +96,54 @@
         </div>
     </div>
 </div>
+
+<script>
+function iniciarLaboratorio(retoNombre) {
+    const btn = document.getElementById(`btn-iniciar-lab-${retoNombre}`);
+    const statusDiv = document.getElementById(`status-${retoNombre}`);
+    const abrirBtn = document.getElementById(`btn-abrir-lab-${retoNombre}`);
+    
+    // Deshabilitar botón mientras se procesa
+    btn.disabled = true;
+    btn.textContent = 'Iniciando laboratorio...';
+    
+    // Mostrar estado de proceso
+    statusDiv.innerHTML = '<div class="alert alert-info">Iniciando laboratorio...</div>';
+    
+    // Obtener el token CSRF
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    // Enviar solicitud POST
+    fetch('/labs/xss-stored/iniciar/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken,
+        },
+        body: JSON.stringify({}),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            statusDiv.innerHTML = '<div class="alert alert-success">Laboratorio iniciado correctamente</div>';
+            btn.classList.add('d-none');
+            abrirBtn.classList.remove('d-none');
+        } else {
+            statusDiv.innerHTML = `<div class="alert alert-danger">Error: ${data.message}</div>`;
+            btn.disabled = false;
+            btn.textContent = 'Iniciar laboratorio';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        statusDiv.innerHTML = '<div class="alert alert-danger">Error al iniciar el laboratorio</div>';
+        btn.disabled = false;
+        btn.textContent = 'Iniciar laboratorio';
+    });
+}
+
+function abrirLaboratorio() {
+    window.open('http://127.0.0.1:8081', '_blank', 'noopener,noreferrer');
+}
+</script>
 {% endblock %}
