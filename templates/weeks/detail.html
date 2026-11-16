@@ -75,6 +75,10 @@
                             <!-- Botones del laboratorio XSS -->
                             {% if semana.numero == 2 and reto.nombre == "Reto 1" %}
                             <div class="mt-2">
+                                <!-- Formulario para CSRF -->
+                                <form id="form-iniciar-lab-xss" style="display: none;">
+                                    {% csrf_token %}
+                                </form>
                                 <button id="btn-iniciar-lab-{{ reto.nombre }}" 
                                         class="btn btn-primary" 
                                         onclick="iniciarLaboratorio('{{ reto.nombre }}')">
@@ -110,19 +114,39 @@ function iniciarLaboratorio(retoNombre) {
     // Mostrar estado de proceso
     statusDiv.innerHTML = '<div class="alert alert-info">Iniciando laboratorio...</div>';
     
-    // Obtener el token CSRF
-    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    // Obtener el token CSRF desde el formulario específico del laboratorio
+    const form = document.getElementById('form-iniciar-lab-xss');
+    if (!form) {
+        statusDiv.innerHTML = '<div class="alert alert-danger">Error: No se encontró el formulario de seguridad</div>';
+        btn.disabled = false;
+        btn.textContent = 'Iniciar laboratorio';
+        return;
+    }
+    
+    const csrftoken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+    if (!csrftoken) {
+        statusDiv.innerHTML = '<div class="alert alert-danger">Error: No se encontró el token de seguridad</div>';
+        btn.disabled = false;
+        btn.textContent = 'Iniciar laboratorio';
+        return;
+    }
     
     // Enviar solicitud POST
-    fetch('/labs/xss-stored/iniciar/', {
+    fetch('{% url "labs:iniciar" lab_id="xss-stored" %}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': csrftoken,
         },
+        credentials: 'same-origin',
         body: JSON.stringify({}),
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             statusDiv.innerHTML = '<div class="alert alert-success">Laboratorio iniciado correctamente</div>';
@@ -136,7 +160,7 @@ function iniciarLaboratorio(retoNombre) {
     })
     .catch(error => {
         console.error('Error:', error);
-        statusDiv.innerHTML = '<div class="alert alert-danger">Error al iniciar el laboratorio</div>';
+        statusDiv.innerHTML = '<div class="alert alert-danger">Error al iniciar el laboratorio: ' + error.message + '</div>';
         btn.disabled = false;
         btn.textContent = 'Iniciar laboratorio';
     });
