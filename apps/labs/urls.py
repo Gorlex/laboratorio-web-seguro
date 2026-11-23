@@ -1,12 +1,9 @@
 from django.urls import path
 from . import views
 
-app_name = "labs"
+app_name = 'labs'
 
 urlpatterns = [
-    path(
-        "<slug:lab_id>/iniciar/",
-        views.iniciar_laboratorio_view,
-        name="iniciar",
-    ),
+    path('xss-stored/iniciar/', views.iniciar_laboratorio_view, {'lab_id': 'xss-stored'}, name='iniciar'),
+    path('<slug:lab_id>/finalizar/', views.finalizar_laboratorio_view, name='finalizar'),
 ]
