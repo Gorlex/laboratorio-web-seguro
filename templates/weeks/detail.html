@@ -79,17 +79,22 @@
                                 <form id="form-iniciar-lab-xss" style="display: none;">
                                     {% csrf_token %}
                                 </form>
-                                <button id="btn-iniciar-lab-{{ reto.nombre }}" 
+                                <button id="btn-iniciar-lab-xss" 
                                         class="btn btn-primary" 
-                                        onclick="iniciarLaboratorio('{{ reto.nombre }}')">
+                                        onclick="iniciarLaboratorio()">
                                     Iniciar laboratorio
                                 </button>
-                                <button id="btn-abrir-lab-{{ reto.nombre }}" 
+                                <button id="btn-abrir-lab-xss" 
                                         class="btn btn-success d-none" 
                                         onclick="abrirLaboratorio()">
                                     Abrir laboratorio
                                 </button>
-                                <div id="status-{{ reto.nombre }}" class="mt-2"></div>
+                                <button id="btn-finalizar-lab-xss" 
+                                        class="btn btn-danger d-none" 
+                                        onclick="finalizarLaboratorio()">
+                                    Finalizar laboratorio
+                                </button>
+                                <div id="status-lab-xss" class="mt-2"></div>
                             </div>
                             {% endif %}
                         </div>
@@ -102,32 +107,41 @@
 </div>
 
 <script>
-function iniciarLaboratorio(retoNombre) {
-    const btn = document.getElementById(`btn-iniciar-lab-${retoNombre}`);
-    const statusDiv = document.getElementById(`status-${retoNombre}`);
-    const abrirBtn = document.getElementById(`btn-abrir-lab-${retoNombre}`);
+function iniciarLaboratorio() {
+    const iniciarBtn = document.getElementById('btn-iniciar-lab-xss');
+    const statusDiv = document.getElementById('status-lab-xss');
+    const abrirBtn = document.getElementById('btn-abrir-lab-xss');
+    const finalizarBtn = document.getElementById('btn-finalizar-lab-xss');
     
     // Deshabilitar botón mientras se procesa
-    btn.disabled = true;
-    btn.textContent = 'Iniciando laboratorio...';
+    iniciarBtn.disabled = true;
+    iniciarBtn.textContent = 'Iniciando laboratorio...';
     
     // Mostrar estado de proceso
-    statusDiv.innerHTML = '<div class="alert alert-info">Iniciando laboratorio...</div>';
+    if (statusDiv) {
+        statusDiv.innerHTML = '<div class="alert alert-info">Iniciando laboratorio...</div>';
+    } else {
+        console.error('Elemento status-lab-xss no encontrado');
+    }
     
     // Obtener el token CSRF desde el formulario específico del laboratorio
     const form = document.getElementById('form-iniciar-lab-xss');
     if (!form) {
-        statusDiv.innerHTML = '<div class="alert alert-danger">Error: No se encontró el formulario de seguridad</div>';
-        btn.disabled = false;
-        btn.textContent = 'Iniciar laboratorio';
+        if (statusDiv) {
+            statusDiv.innerHTML = '<div class="alert alert-danger">Error: No se encontró el formulario de seguridad</div>';
+        }
+        iniciarBtn.disabled = false;
+        iniciarBtn.textContent = 'Iniciar laboratorio';
         return;
     }
     
     const csrftoken = form.querySelector('[name=csrfmiddlewaretoken]').value;
     if (!csrftoken) {
-        statusDiv.innerHTML = '<div class="alert alert-danger">Error: No se encontró el token de seguridad</div>';
-        btn.disabled = false;
-        btn.textContent = 'Iniciar laboratorio';
+        if (statusDiv) {
+            statusDiv.innerHTML = '<div class="alert alert-danger">Error: No se encontró el token de seguridad</div>';
+        }
+        iniciarBtn.disabled = false;
+        iniciarBtn.textContent = 'Iniciar laboratorio';
         return;
     }
     
@@ -149,21 +163,112 @@ function iniciarLaboratorio(retoNombre) {
     })
     .then(data => {
         if (data.success) {
-            statusDiv.innerHTML = '<div class="alert alert-success">Laboratorio iniciado correctamente</div>';
-            btn.classList.add('d-none');
+            if (statusDiv) {
+                statusDiv.innerHTML = '<div class="alert alert-success">Laboratorio iniciado correctamente</div>';
+            }
+            iniciarBtn.classList.add('d-none');
             abrirBtn.classList.remove('d-none');
+            finalizarBtn.classList.remove('d-none');
         } else {
-            statusDiv.innerHTML = `<div class="alert alert-danger">Error: ${data.message}</div>`;
-            btn.disabled = false;
-            btn.textContent = 'Iniciar laboratorio';
+            if (statusDiv) {
+                statusDiv.innerHTML = `<div class="alert alert-danger">Error: ${data.message}</div>`;
+            }
+            iniciarBtn.disabled = false;
+            iniciarBtn.textContent = 'Iniciar laboratorio';
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        statusDiv.innerHTML = '<div class="alert alert-danger">Error al iniciar el laboratorio: ' + error.message + '</div>';
-        btn.disabled = false;
-        btn.textContent = 'Iniciar laboratorio';
+        if (statusDiv) {
+            statusDiv.innerHTML = '<div class="alert alert-danger">Error al iniciar el laboratorio: ' + error.message + '</div>';
+        }
+        iniciarBtn.disabled = false;
+        iniciarBtn.textContent = 'Iniciar laboratorio';
     });
+}
+
+function finalizarLaboratorio() {
+    // Verificar que no haya otra operación en curso
+    if (confirm('¿Está seguro de que desea finalizar el laboratorio? Esta acción detendrá el contenedor y perderá los datos actuales.')) {
+        const iniciarBtn = document.getElementById('btn-iniciar-lab-xss');
+        const abrirBtn = document.getElementById('btn-abrir-lab-xss');
+        const finalizarBtn = document.getElementById('btn-finalizar-lab-xss');
+        const statusDiv = document.getElementById('status-lab-xss');
+        
+        // Deshabilitar botón mientras se procesa
+        finalizarBtn.disabled = true;
+        finalizarBtn.textContent = 'Finalizando laboratorio...';
+        
+        // Mostrar estado de proceso
+        if (statusDiv) {
+            statusDiv.innerHTML = '<div class="alert alert-info">Finalizando laboratorio...</div>';
+        } else {
+            console.error('Elemento status-lab-xss no encontrado');
+            finalizarBtn.disabled = false;
+            finalizarBtn.textContent = 'Finalizar laboratorio';
+            return;
+        }
+        
+        // Obtener el token CSRF desde el formulario específico del laboratorio
+        const form = document.getElementById('form-iniciar-lab-xss');
+        if (!form) {
+            statusDiv.innerHTML = '<div class="alert alert-danger">Error: No se encontró el formulario de seguridad</div>';
+            finalizarBtn.disabled = false;
+            finalizarBtn.textContent = 'Finalizar laboratorio';
+            return;
+        }
+        
+        const csrftoken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+        if (!csrftoken) {
+            statusDiv.innerHTML = '<div class="alert alert-danger">Error: No se encontró el token de seguridad</div>';
+            finalizarBtn.disabled = false;
+            finalizarBtn.textContent = 'Finalizar laboratorio';
+            return;
+        }
+        
+        // Enviar solicitud POST
+        fetch('{% url "labs:finalizar" lab_id="xss-stored" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken,
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({}),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                if (statusDiv) {
+                    statusDiv.innerHTML = '<div class="alert alert-success">Laboratorio finalizado correctamente</div>';
+                }
+                finalizarBtn.classList.add('d-none');
+                abrirBtn.classList.add('d-none');
+                iniciarBtn.classList.remove('d-none');
+                iniciarBtn.disabled = false;
+                iniciarBtn.textContent = 'Iniciar laboratorio';
+            } else {
+                if (statusDiv) {
+                    statusDiv.innerHTML = `<div class="alert alert-danger">Error: ${data.message}</div>`;
+                }
+                finalizarBtn.disabled = false;
+                finalizarBtn.textContent = 'Finalizar laboratorio';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            if (statusDiv) {
+                statusDiv.innerHTML = '<div class="alert alert-danger">Error al finalizar el laboratorio: ' + error.message + '</div>';
+            }
+            finalizarBtn.disabled = false;
+            finalizarBtn.textContent = 'Finalizar laboratorio';
+        });
+    }
 }
 
 function abrirLaboratorio() {
