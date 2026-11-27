@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import sqlite3
 from datetime import datetime
 import os
+from contextlib import closing
 
 app = Flask(__name__)
 
@@ -214,6 +215,80 @@ def listar():
     notas = cursor.fetchall()
     conn.close()
     return render_template('listar.html', notas=notas, usuario=session.get('usuario_nombre'))
+
+# Nuevo endpoint para validar el evento XSS candidato
+@app.route('/validar-reto', methods=['POST'])
+def validar_reto():
+    try:
+        # Verificar que sea una solicitud JSON
+        if not request.is_json:
+            return jsonify({
+                "success": False,
+                "message": "Solicitud inválida: se requiere formato JSON"
+            }), 400
+        
+        data = request.get_json()
+        
+        # Validar que exista nota_id
+        if 'nota_id' not in data:
+            return jsonify({
+                "success": False,
+                "message": "Falta el campo nota_id"
+            }), 400
+        
+        nota_id = data['nota_id']
+        
+        # Validar que nota_id sea un entero positivo
+        if not isinstance(nota_id, int) or nota_id <= 0:
+            return jsonify({
+                "success": False,
+                "message": "Identificador de nota inválido: debe ser un número entero positivo"
+            }), 400
+        
+        # Usar la función get_db() existente para conectarse a la base de datos
+        conn = get_db()
+        cursor = conn.cursor()
+        
+        # Consultar la tabla notas_medicas mediante una consulta SQL parametrizada
+        cursor.execute(
+            'SELECT id FROM notas_medicas WHERE id = ?',
+            (nota_id,)
+        )
+        
+        result = cursor.fetchone()
+        conn.close()
+        
+        # Comprobar que existe una nota con el identificador recibido
+        if result is None:
+            return jsonify({
+                "success": False,
+                "lab_id": "xss-stored",
+                "nota_id": nota_id,
+                "metodo": "xss_stored_alert",
+                "message": "Nota no encontrada"
+            }), 404
+        
+        # Si llegamos aquí, la nota existe
+        return jsonify({
+            "success": True,
+            "lab_id": "xss-stored",
+            "nota_id": nota_id,
+            "metodo": "xss_stored_alert",
+            "message": "Evento candidato aceptado"
+        }), 200
+        
+    except sqlite3.Error as e:
+        # Manejar errores de SQLite sin exponer detalles internos
+        return jsonify({
+            "success": False,
+            "message": "Error interno del servidor"
+        }), 500
+    except Exception as e:
+        # Manejar otros errores
+        return jsonify({
+            "success": False,
+            "message": "Error interno del servidor"
+        }), 500
 
 if __name__ == '__main__':
     init_db()
