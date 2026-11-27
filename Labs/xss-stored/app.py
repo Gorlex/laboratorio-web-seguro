@@ -219,46 +219,55 @@ def listar():
 # Nuevo endpoint para validar el evento XSS candidato
 @app.route('/validar-reto', methods=['POST'])
 def validar_reto():
+    """
+    Recibe y comprueba un evento candidato de XSS almacenado.
+    """
+
+    # Verificar el formato de la solicitud
+    if not request.is_json:
+        return jsonify({
+            "success": False,
+            "message": "Solicitud inválida: se requiere formato JSON"
+        }), 400
+
+    # Obtener y validar el contenido JSON
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+        return jsonify({
+            "success": False,
+            "message": "Contenido JSON inválido"
+        }), 400
+
+    # Verificar la existencia del identificador
+    if "nota_id" not in data:
+        return jsonify({
+            "success": False,
+            "message": "Falta el campo nota_id"
+        }), 400
+
+    nota_id = data["nota_id"]
+
+    # Validar tipo y rango del identificador
+    if type(nota_id) is not int or not 1 <= nota_id <= 2**63 - 1:
+        return jsonify({
+            "success": False,
+            "message": "Identificador de nota inválido"
+        }), 400
+
     try:
-        # Verificar que sea una solicitud JSON
-        if not request.is_json:
-            return jsonify({
-                "success": False,
-                "message": "Solicitud inválida: se requiere formato JSON"
-            }), 400
-        
-        data = request.get_json()
-        
-        # Validar que exista nota_id
-        if 'nota_id' not in data:
-            return jsonify({
-                "success": False,
-                "message": "Falta el campo nota_id"
-            }), 400
-        
-        nota_id = data['nota_id']
-        
-        # Validar que nota_id sea un entero positivo
-        if not isinstance(nota_id, int) or nota_id <= 0:
-            return jsonify({
-                "success": False,
-                "message": "Identificador de nota inválido: debe ser un número entero positivo"
-            }), 400
-        
-        # Usar la función get_db() existente para conectarse a la base de datos
-        conn = get_db()
-        cursor = conn.cursor()
-        
-        # Consultar la tabla notas_medicas mediante una consulta SQL parametrizada
-        cursor.execute(
-            'SELECT id FROM notas_medicas WHERE id = ?',
-            (nota_id,)
-        )
-        
-        result = cursor.fetchone()
-        conn.close()
-        
-        # Comprobar que existe una nota con el identificador recibido
+        # Garantizar el cierre de la conexión SQLite
+        with closing(get_db()) as conn:
+            cursor = conn.cursor()
+
+            cursor.execute(
+                'SELECT id FROM notas_medicas WHERE id = ?',
+                (nota_id,)
+            )
+
+            result = cursor.fetchone()
+
+        # Comprobar que la nota existe
         if result is None:
             return jsonify({
                 "success": False,
@@ -267,8 +276,8 @@ def validar_reto():
                 "metodo": "xss_stored_alert",
                 "message": "Nota no encontrada"
             }), 404
-        
-        # Si llegamos aquí, la nota existe
+
+        # Aceptar el evento candidato
         return jsonify({
             "success": True,
             "lab_id": "xss-stored",
@@ -276,6 +285,18 @@ def validar_reto():
             "metodo": "xss_stored_alert",
             "message": "Evento candidato aceptado"
         }), 200
+
+    except sqlite3.Error:
+        app.logger.exception(
+            "Error SQLite al comprobar evento candidato XSS"
+        )
+
+        return jsonify({
+            "success": False,
+            "message": "Error interno del servidor"
+        }), 500
+
+    
         
     except sqlite3.Error as e:
         # Manejar errores de SQLite sin exponer detalles internos
