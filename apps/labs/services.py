@@ -2,6 +2,7 @@ import subprocess
 from django.utils import timezone
 from .registry import LABORATORIOS
 from .models import LaboratorioActivo
+from uuid import uuid4
 
 def iniciar_laboratorio(lab_id):
     """Inicia un laboratorio autorizado mediante Docker Compose."""
@@ -26,19 +27,103 @@ def iniciar_laboratorio(lab_id):
             "message": "No se encontró docker-compose.yml",
         }
     
-    # Construir el comando Docker Compose
-    comando = [
+    # Construir el comando Docker Compose para verificar si el contenedor ya está corriendo
+    comando_ps = [
         "docker",
         "compose",
         "-f",
         str(compose_file),
-        "up",
-        "-d",
-        "--no-deps",
+        "ps",
+        "--status",
+        "running",
+        "-q",
         laboratorio["service"],
     ]
     
     try:
+        # Verificar el estado actual del contenedor
+        resultado_ps = subprocess.run(
+            comando_ps,
+            cwd=str(compose_dir),
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+        
+        # Si el comando falla, devolver error
+        if resultado_ps.returncode != 0:
+            return {
+                "success": False,
+                "message": f"Error al verificar estado del contenedor: {resultado_ps.stderr}",
+                "stdout": resultado_ps.stdout,
+                "stderr": resultado_ps.stderr,
+            }
+        
+        # Determinar si hay contenedor activo
+        container_running = bool(resultado_ps.stdout.strip())
+        
+        # Obtener el registro actual del laboratorio antes de ejecutar Docker
+        try:
+            lab_registro = LaboratorioActivo.objects.get(lab_id=lab_id)
+        except LaboratorioActivo.DoesNotExist:
+            lab_registro = None
+        
+        # Verificar combinaciones inconsistentes antes de ejecutar Docker
+        if (     container_running     and lab_registro     and lab_registro.activo     and lab_registro.execution_id is not None ):
+            # El contenedor está corriendo y el registro indica activo con execution_id - continuar ejecución
+            # Conservar execution_id y fecha_inicio, solo actualizar ultima_actividad
+            lab_registro.ultima_actividad = timezone.now()
+            lab_registro.save()
+            return {
+                "success": True,
+                "message": "Laboratorio ya está en ejecución",
+                "stdout": resultado_ps.stdout,
+                "stderr": resultado_ps.stderr,
+            }
+        elif not container_running and lab_registro and lab_registro.activo:
+            # El contenedor no está corriendo pero el registro indica activo - inconsistencia
+            return {
+                "success": False,
+                "message": "Inconsistencia detectada: el registro indica que el laboratorio está activo, pero no se encuentra contenedor en ejecución",
+            }
+        elif container_running and lab_registro and not lab_registro.activo:
+            # El contenedor está corriendo pero el registro indica inactivo - inconsistencia
+            return {
+                "success": False,
+                "message": "Inconsistencia detectada: se encontró contenedor en ejecución, pero el registro indica que no está activo",
+            }
+        elif not container_running and lab_registro and not lab_registro.activo:
+            # El contenedor no está corriendo y el registro indica inactivo
+            # Verificar si tiene execution_id (puede ser válido)
+            if lab_registro.execution_id is None:
+                # Registro inactivo sin execution_id - nueva ejecución
+                pass  # Continuar con la lógica de nueva ejecución
+            else:
+                # Registro inactivo con execution_id - continuar ejecución
+                pass  # Continuar con la lógica de nueva ejecución
+        elif lab_registro is None and not container_running:
+            # No existe registro y no hay contenedor activo - nueva ejecución
+            pass  # Continuar con la lógica de nueva ejecución
+        else:
+            # Otra combinación inconsistente
+            return {
+                "success": False,
+                "message": "Combinación de estados inconsistente",
+            }
+        
+        # Construir el comando Docker Compose para iniciar
+        comando = [
+            "docker",
+            "compose",
+            "-f",
+            str(compose_file),
+            "up",
+            "-d",
+            "--no-deps",
+            laboratorio["service"],
+        ]
+        
         # Ejecutar el comando con timeout de 120 segundos
         resultado = subprocess.run(
             comando,
@@ -60,24 +145,28 @@ def iniciar_laboratorio(lab_id):
         
         # Si el comando tiene éxito, registrar en la base de datos
         try:
-            # Obtener o crear el registro del laboratorio
-            lab_registro, creado = LaboratorioActivo.objects.update_or_create(
-                lab_id=lab_id,
-                defaults={
-                    'activo': True,
-                    'fecha_inicio': timezone.now(),
-                    'ultima_actividad': timezone.now(),
-                    'fecha_finalizacion': None
-                }
-            )
-            
-            # Si el registro ya existía y estaba activo, no modificamos las fechas de inicio
-            # Solo actualizamos la última actividad
-            if not creado and lab_registro.activo:
-                # El contenedor ya estaba ejecutándose, solo actualizamos la última actividad
-                lab_registro.ultima_actividad = timezone.now()
+            # Crear o actualizar el registro del laboratorio
+            if lab_registro is None:
+                # Es una nueva ejecución
+                execution_id = uuid4()
+                LaboratorioActivo.objects.create(
+                    lab_id=lab_id,
+                    execution_id=execution_id,
+                    activo=True,
+                    fecha_inicio=timezone.now(),
+                    ultima_actividad=timezone.now(),
+                    fecha_finalizacion=None
+                )
+            else:
+                # Registrar una nueva ejecución
+                ahora = timezone.now()
+                lab_registro.execution_id = uuid4()
+                lab_registro.activo = True
+                lab_registro.fecha_inicio = ahora
+                lab_registro.ultima_actividad = ahora
+                lab_registro.fecha_finalizacion = None
                 lab_registro.save()
-            
+                    
         except Exception as db_error:
             # Registrar el error pero no fallar la operación de Docker
             print(f"Error al registrar en base de datos: {db_error}")
